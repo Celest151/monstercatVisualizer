@@ -1,10 +1,10 @@
 let settings = {
     background: {
-        active: false,
-        image: "./bg/2.jpg", // Path to the background image
+        active: true,
+        image: "./bg/greenscreen.png", // Path to the background image
     },
-    particles: true, // Set to true to enable particles, false to disable
-    genreColorsActive: true, // Set to true to enable genre colors, false to disable
+    particles: false, // Set to true to enable particles, false to disable
+    genreColorsActive: false, // Set to true to enable genre colors, false to disable
     genreColors: {
         Default: "#FFFFFF", // Default color for genres not specified or when genre colors are disabled
         Trap: "#8C0F27",

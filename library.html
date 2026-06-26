@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizer Library</title>
+    <link rel="stylesheet" href="./library.css">
+    <script defer src="./library.js"></script>
+</head>
+
+<body>
+    <svg class="icon-sprite" aria-hidden="true">
+        <symbol id="icon-play" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"></path>
+        </symbol>
+        <symbol id="icon-pause" viewBox="0 0 24 24">
+            <path d="M7 5h4v14H7z"></path>
+            <path d="M13 5h4v14h-4z"></path>
+        </symbol>
+        <symbol id="icon-stop" viewBox="0 0 24 24">
+            <path d="M6 6h12v12H6z"></path>
+        </symbol>
+        <symbol id="icon-previous" viewBox="0 0 24 24">
+            <path d="M6 5h2v14H6z"></path>
+            <path d="M19 5v14l-10-7z"></path>
+        </symbol>
+        <symbol id="icon-next" viewBox="0 0 24 24">
+            <path d="M16 5h2v14h-2z"></path>
+            <path d="M5 5v14l10-7z"></path>
+        </symbol>
+    </svg>
+
+    <header class="menu" id="menuBar">
+        <div class="menu-item">
+            <button class="menu-button" data-menu="fileMenu">File</button>
+            <div class="menu-dropdown" id="fileMenu">
+                <button data-command="add-files">Add files...</button>
+                <button data-command="clear-playlist">Clear playlist</button>
+                <button data-command="close-window">Exit</button>
+            </div>
+        </div>
+        <div class="menu-item">
+            <button class="menu-button" data-menu="editMenu">Edit</button>
+            <div class="menu-dropdown" id="editMenu">
+                <button data-command="remove-selected">Remove selected</button>
+                <button data-command="clear-filter">Clear filter</button>
+            </div>
+        </div>
+        <div class="menu-item">
+            <button class="menu-button" data-menu="viewMenu">View</button>
+            <div class="menu-dropdown" id="viewMenu">
+                <button data-command="focus-filter">Focus filter</button>
+                <button data-command="refresh-metadata">Refresh metadata</button>
+                <button class="menu-checkbox" id="viewToggleName" data-command="toggle-visibility-name">✓ Show Name</button>
+                <button class="menu-checkbox" id="viewToggleArtist" data-command="toggle-visibility-artist">✓ Show Artist</button>
+                <button class="menu-checkbox" id="viewToggleCover" data-command="toggle-visibility-cover">✓ Show Cover</button>
+            </div>
+        </div>
+        <div class="menu-item">
+            <button class="menu-button" data-menu="playbackMenu">Playback</button>
+            <div class="menu-dropdown" id="playbackMenu">
+                <button data-command="play-selected">Play selected</button>
+                <button data-command="toggle-playback">Play/Pause</button>
+                <button data-command="stop">Stop</button>
+                <button data-command="previous">Previous</button>
+                <button data-command="next">Next</button>
+            </div>
+        </div>
+        <div class="menu-item">
+            <button class="menu-button" data-menu="libraryMenu">Library</button>
+            <div class="menu-dropdown" id="libraryMenu">
+                <button data-command="rescan-library">Rescan metadata</button>
+                <button data-command="save-library">Save playlist</button>
+            </div>
+        </div>
+        <div class="menu-item">
+            <button class="menu-button" data-menu="recordingMenu">Recording</button>
+            <div class="menu-dropdown" id="recordingMenu">
+                <button data-command="select-recording-folder">Output folder...</button>
+                <button data-command="record-selected">Record selected track</button>
+                <button data-command="record-playlist">Record playlist</button>
+                <button data-command="stop-recording">Stop recording</button>
+            </div>
+        </div>
+        <div class="menu-item">
+            <button class="menu-button" data-menu="helpMenu">Help</button>
+            <div class="menu-dropdown" id="helpMenu">
+                <button data-command="about">About</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="toolbar">
+        <button class="icon-button" id="stop" title="Stop" aria-label="Stop">
+            <svg><use href="#icon-stop"></use></svg>
+        </button>
+        <button class="icon-button" id="playPause" title="Play/Pause" aria-label="Play">
+            <svg><use id="playPauseIcon" href="#icon-play"></use></svg>
+        </button>
+        <button class="icon-button" id="previous" title="Previous" aria-label="Previous">
+            <svg><use href="#icon-previous"></use></svg>
+        </button>
+        <button class="icon-button" id="next" title="Next" aria-label="Next">
+            <svg><use href="#icon-next"></use></svg>
+        </button>
+        <input id="seek" type="range" min="0" max="100" value="0" aria-label="Seek">
+        <input id="search" type="search" placeholder="Filter">
+    </section>
+
+    <main class="layout">
+        <aside class="sidebar">
+            <div class="tabs">
+                <button>Album List</button>
+                <button class="active">Selection Properties</button>
+            </div>
+            <div class="properties">
+                <div class="property-header">
+                    <span>Name</span>
+                    <span>Value</span>
+                </div>
+                <div id="selectionProperties"></div>
+            </div>
+        </aside>
+
+        <div id="panelSplitter" class="panel-splitter" role="separator" aria-orientation="vertical" aria-label="Resize panels"></div>
+
+        <section class="playlist">
+            <div class="playlist-title">Default Playlist</div>
+            <table id="playlistTable">
+                <colgroup>
+                    <col data-column="playing">
+                    <col data-column="artist">
+                    <col data-column="track">
+                    <col data-column="title">
+                    <col data-column="duration">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th data-column="playing">Playing<span class="column-resizer" data-column="playing"></span></th>
+                        <th data-column="artist">Artist / album<span class="column-resizer" data-column="artist"></span></th>
+                        <th data-column="track">Track no<span class="column-resizer" data-column="track"></span></th>
+                        <th data-column="title">Title / track artist<span class="column-resizer" data-column="title"></span></th>
+                        <th data-column="duration">Duration<span class="column-resizer" data-column="duration"></span></th>
+                    </tr>
+                </thead>
+                <tbody id="tracks"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer id="status">Playback stopped</footer>
+</body>
+
+</html>

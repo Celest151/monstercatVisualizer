@@ -1,8 +1,21 @@
 {
+  "name": "monstercat-visualizer",
+  "version": "1.0.0",
+  "description": "A desktop Monstercat-style audio visualizer.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "server": "node app.js"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "ffmpeg-static": "^5.3.0",
+    "music-metadata": "^11.13.0",
     "node-fetch": "^2.6.1",
     "stream": "^0.0.3"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0"
   }
 }

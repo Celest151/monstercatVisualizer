@@ -1,0 +1,394 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #202020;
+    color: #dfdfdf;
+    font: 12px "Segoe UI", Arial, sans-serif;
+    overflow: hidden;
+    --sidebar-width: 50vw;
+}
+
+body.resizing-panels {
+    cursor: col-resize;
+    user-select: none;
+}
+
+body.resizing-columns {
+    cursor: col-resize;
+    user-select: none;
+}
+
+body::after {
+    content: "Drop audio files to add them";
+    position: fixed;
+    inset: 8px;
+    display: none;
+    place-items: center;
+    z-index: 20;
+    border: 1px dashed #8ab4f8;
+    background: rgba(18, 34, 54, 0.88);
+    color: #ffffff;
+    font-size: 18px;
+}
+
+body.dragging::after {
+    display: grid;
+}
+
+button,
+input,
+select {
+    color: #e8e8e8;
+    background: #252525;
+    border: 1px solid #5f5f5f;
+    font: inherit;
+}
+
+button {
+    height: 24px;
+    padding: 2px 9px;
+    cursor: default;
+}
+
+button:hover,
+button.active {
+    background: #303844;
+    border-color: #7c8fa8;
+}
+
+.icon-sprite {
+    display: none;
+}
+
+.icon-button {
+    width: 31px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0;
+}
+
+.icon-button svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+    pointer-events: none;
+}
+
+.icon-button:hover svg {
+    color: #ffffff;
+}
+
+.menu {
+    height: 30px;
+    display: flex;
+    align-items: end;
+    gap: 0;
+    padding: 4px 8px 0;
+    border-bottom: 1px solid #3a3a3a;
+    position: relative;
+    z-index: 30;
+}
+
+.menu-item {
+    position: relative;
+}
+
+.menu-button {
+    border: 0;
+    background: transparent;
+    height: 25px;
+    padding: 3px 7px;
+}
+
+.menu-button.open,
+.menu-button:hover {
+    background: #303844;
+}
+
+.menu-dropdown {
+    position: absolute;
+    top: 25px;
+    left: 0;
+    min-width: 150px;
+    display: none;
+    padding: 3px;
+    background: #252525;
+    border: 1px solid #5b5b5b;
+    box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.45);
+}
+
+.menu-dropdown.open {
+    display: block;
+}
+
+.menu-dropdown button {
+    width: 100%;
+    height: 24px;
+    display: block;
+    padding: 3px 20px 3px 8px;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.menu-dropdown button:hover {
+    background: #153b62;
+}
+
+.toolbar {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border-bottom: 1px solid #3a3a3a;
+}
+
+.toolbar input {
+    width: 210px;
+    height: 23px;
+    margin-left: 12px;
+    padding: 2px 7px;
+}
+
+.layout {
+    height: calc(100vh - 86px);
+    display: grid;
+    grid-template-columns: minmax(260px, var(--sidebar-width)) 6px minmax(260px, 1fr);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.panel-splitter {
+    position: relative;
+    cursor: col-resize;
+    background: #252525;
+    border-left: 1px solid #4a4a4a;
+    border-right: 1px solid #111;
+}
+
+.panel-splitter::after {
+    content: "";
+    position: absolute;
+    inset: 0 2px;
+    background: transparent;
+}
+
+.panel-splitter:hover,
+body.resizing-panels .panel-splitter {
+    background: #3a4a5e;
+}
+
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #4a4a4a;
+}
+
+.tabs button {
+    height: 23px;
+    border-left: 0;
+    border-top: 0;
+}
+
+.properties {
+    flex: 1;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding-bottom: 8px;
+    scrollbar-color: #5a5a5a #242424;
+    scrollbar-width: thin;
+}
+
+.properties::-webkit-scrollbar {
+    width: 12px;
+}
+
+.properties::-webkit-scrollbar-track {
+    background: #242424;
+}
+
+.properties::-webkit-scrollbar-thumb {
+    background: #5a5a5a;
+    border: 2px solid #242424;
+}
+
+.properties::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+.property-header,
+.property-row {
+    display: grid;
+    grid-template-columns: 115px minmax(0, 1fr);
+}
+
+.property-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #1f1f1f;
+    border-bottom: 1px solid #555;
+}
+
+.property-header span,
+.property-row span {
+    min-width: 0;
+    padding: 3px 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.property-header span:first-child,
+.property-row span:first-child {
+    border-right: 1px solid #555;
+}
+
+.property-section {
+    display: grid;
+    grid-template-columns: 70px 1fr;
+    align-items: center;
+    gap: 8px;
+    color: #63b5ff;
+    padding: 8px 5px 4px;
+    font-size: 14px;
+}
+
+.property-section::after {
+    content: "";
+    height: 1px;
+    background: #2e6b9e;
+}
+
+.playlist {
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.playlist-title {
+    height: 22px;
+    padding: 3px 7px;
+    border-bottom: 1px solid #4a4a4a;
+    background: #282828;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+th {
+    position: relative;
+    height: 23px;
+    padding: 3px 7px;
+    background: #242424;
+    border-right: 1px solid #555;
+    border-bottom: 1px solid #555;
+    color: #f1f1f1;
+    text-align: left;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+td {
+    height: 22px;
+    padding: 2px 7px;
+    border-bottom: 1px solid #252525;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+tr {
+    color: #ddd;
+}
+
+tr.selected {
+    background: #153b62;
+}
+
+tr.playing {
+    color: #ffffff;
+}
+
+.column-resizer {
+    position: absolute;
+    top: 0;
+    right: -3px;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 2;
+}
+
+.column-resizer:hover,
+body.resizing-columns .column-resizer {
+    background: rgba(99, 181, 255, 0.35);
+}
+
+footer {
+    height: 22px;
+    padding: 3px 7px;
+    border-top: 1px solid #4a4a4a;
+}
+
+/* Custom Seek Bar style matching Foobar2000 style */
+#seek {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    width: auto;
+    height: 4px;
+    background: #3a3a3a;
+    outline: none;
+    border: none;
+    border-radius: 2px;
+    margin: 0 12px;
+    padding: 0;
+}
+
+#seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 8px;
+    height: 14px;
+    background: #007acc; /* Solid Blue Foobar theme */
+    cursor: pointer;
+    border: none;
+    border-radius: 1px;
+}
+
+#seek::-webkit-slider-thumb:hover {
+    background: #1493e6;
+}
+
+/* Drag and Drop playlist reordering styles */
+tr.dragging-row {
+    opacity: 0.4;
+    background: #333333;
+}
+
+tr.drag-over-above td {
+    border-top: 2px solid #007acc !important;
+}
+
+tr.drag-over-below td {
+    border-bottom: 2px solid #007acc !important;
+}
+

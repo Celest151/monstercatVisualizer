@@ -4,49 +4,82 @@ const express = require('express');
 const fetch = require('node-fetch');
 const cors = require('cors');
 
-const app = express();
-const port = process.env.PORT || 5501;
+function createStreamApp() {
+    const app = express();
 
-app.get('/stream', async (req, res) => {
-    const songUrl = req.query.url;
+    app.use(cors());
 
-    if (!songUrl) {
-        return res.status(400).send('Missing URL parameter');
-    }
+    app.get('/stream', async (req, res) => {
+        const songUrl = req.query.url;
 
-    try {
-        const response = await fetch(songUrl);
-
-        if (!response.ok) {
-            return res.status(response.status).send(`Error fetching song: ${response.statusText}`);
+        if (!songUrl) {
+            return res.status(400).send('Missing URL parameter');
         }
 
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader("Content-Length", response.headers.get("content-length") || "0");
-        res.setHeader('Content-Range', `bytes 0-${response.headers.get("content-length") || "0" - 1}/${response.headers.get("content-length") || "0"}`);
-        res.setHeader('Content-Disposition', 'inline');
-        res.setHeader('Accept-Ranges', 'bytes');
+        try {
+            const response = await fetch(songUrl);
 
-        // Set content type if available, otherwise let the browser infer
-        const contentType = response.headers.get('content-type');
-        if (contentType) {
-            res.setHeader('Content-Type', contentType);
-        }
+            if (!response.ok) {
+                return res.status(response.status).send(`Error fetching song: ${response.statusText}`);
+            }
 
-        response.body.pipe(res);
+            const contentLength = response.headers.get("content-length") || "0";
 
-        response.body.on('error', (err) => {
-            console.error('Error piping response:', err);
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader("Content-Length", contentLength);
+            res.setHeader('Content-Range', `bytes 0-${Number(contentLength) - 1}/${contentLength}`);
+            res.setHeader('Content-Disposition', 'inline');
+            res.setHeader('Accept-Ranges', 'bytes');
+
+            // Set content type if available, otherwise let the browser infer
+            const contentType = response.headers.get('content-type');
+            if (contentType) {
+                res.setHeader('Content-Type', contentType);
+            }
+
+            response.body.pipe(res);
+
+            response.body.on('error', (err) => {
+                console.error('Error piping response:', err);
+                if (!res.headersSent) {
+                    res.status(500).send('Error streaming song');
+                } else {
+                    res.end();
+                }
+            });
+
+        } catch (error) {
+            console.error('Error streaming song:', error);
             res.status(500).send('Error streaming song');
+        }
+    });
+
+    return app;
+}
+
+function startServer(port = process.env.PORT || 5501) {
+    return new Promise((resolve, reject) => {
+        const streamApp = createStreamApp();
+        const server = streamApp.listen(port, () => {
+            const address = server.address();
+            const actualPort = (address && typeof address === 'object') ? address.port : port;
+            console.log(`Server listening on port ${actualPort}`);
+            console.log(`Usage: http://localhost:${actualPort}/stream?url=<SONG_URL>`);
+            resolve(server);
         });
 
-    } catch (error) {
-        console.error('Error streaming song:', error);
-        res.status(500).send('Error streaming song');
-    }
-});
+        server.on('error', reject);
+    });
+}
 
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-    console.log(`Usage: http://localhost:${port}/stream?url=<SONG_URL>`);
-});
+if (require.main === module) {
+    startServer().catch(error => {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    });
+}
+
+module.exports = {
+    createStreamApp,
+    startServer,
+};
